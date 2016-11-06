@@ -40,12 +40,14 @@ class Panel extends JPanel implements KeyListener, ActionListener
 	Ball ball;
 	Pong game;
 	boolean gameOver;
+	boolean enableGameOver;
 	public Panel(Pong game)
 	{
 		pOne = new Rack(KeyEvent.VK_UP, KeyEvent.VK_DOWN, 100, game);
 		pTwo = new Rack(KeyEvent.VK_NUMPAD8, KeyEvent.VK_NUMPAD2, 1064, game);
 		ball = new Ball(-6, 6, game);//difficulty
 		gameOver = false;
+		enableGameOver = false;
 		scoreOne = 0;
 		scoreTwo = 0;
 		this.game = game;
@@ -58,7 +60,7 @@ class Panel extends JPanel implements KeyListener, ActionListener
 
 	public void updatePanel()
 	{
-		if(!gameOver)
+		if(!gameOver || !enableGameOver)
 		{
 			pOne.update();
 			pTwo.update();
@@ -113,7 +115,7 @@ class Panel extends JPanel implements KeyListener, ActionListener
 		pOne.paint(g);
 		pTwo.paint(g);
 		ball.paint(g);
-		if(gameOver)
+		if(gameOver && enableGameOver)
 		{
 			g.setFont(new Font("SansSerif", Font.PLAIN, 96));
 			g.drawString("GAME OVER", 285, 440);
