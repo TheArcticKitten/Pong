@@ -39,20 +39,26 @@ class Panel extends JPanel implements KeyListener, ActionListener
 	int scoreOne, scoreTwo;
 	Ball ball;
 	Pong game;
+	int widthC;
+	int heightC;
 	boolean gameOver;
 	boolean enableGameOver;
+	int cells;
 	public Panel(Pong game)
 	{
 		pOne = new Rack(KeyEvent.VK_UP, KeyEvent.VK_DOWN, 100, game);
 		pTwo = new Rack(KeyEvent.VK_NUMPAD8, KeyEvent.VK_NUMPAD2, 1064, game);
-		ball = new Ball(-6, 6, game);//difficulty
+		ball = new Ball(-1, 1, game);//difficulty
 		gameOver = false;
+		cells = 18;
+		widthC = game.WIDTH;
+		heightC = game.HEIGHT-27;
 		enableGameOver = false;
 		scoreOne = 0;
 		scoreTwo = 0;
 		this.game = game;
 		addKeyListener(this);
-		Timer timer = new Timer(1000/60, this);
+		Timer timer = new Timer(5, this);
         timer.start();
 		setBackground(Color.BLACK);
 		setFocusable(true);
@@ -108,13 +114,28 @@ class Panel extends JPanel implements KeyListener, ActionListener
 		//System.out.println("Painted!");
 		super.paintComponent(g);
 		g.setColor(Color.WHITE);
-		g.drawLine(582,0, 582, game.HEIGHT);
+		//g.drawLine(582,0, 582, game.HEIGHT);
 		g.setFont(new Font("SansSerif", Font.PLAIN, 36));
 		g.drawString("" + scoreOne,582-33, 40);
 		g.drawString("" + scoreTwo,582+10, 40);
 		pOne.paint(g);
 		pTwo.paint(g);
 		ball.paint(g);
+		g.setColor(Color.BLUE);
+		//g.drawRect(0, 0, 1181, 752);
+		for(int i = 0; i < cells*((int)(widthC/cells));i += (int)(widthC/cells))
+		{
+			for(int j = 0; j < cells*((int)(heightC/cells));j += (int)(heightC/cells))
+			{
+				if(j != 792)
+				{
+					g.setColor(Color.YELLOW);
+					g.drawRect(i, j, (int)(widthC/cells), (int)(heightC/cells));
+				}
+				//g.setColor(Color.BLUE);
+				//g.drawLine(600, 0, 600, j);
+			}
+		}
 		if(gameOver && enableGameOver)
 		{
 			g.setFont(new Font("SansSerif", Font.PLAIN, 96));
@@ -201,7 +222,7 @@ class Ball
 
 	public void paint(Graphics g)
 	{
-		g.setColor(Color.WHITE);
+			g.setColor(Color.WHITE);
 		g.fillOval(x, y, WIDTH, HEIGHT);
 	//	g.setColor(Color.RED);
 	//	g.drawRect(x,y,WIDTH,HEIGHT); //used for hitbox detection
