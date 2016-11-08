@@ -39,26 +39,25 @@ class Panel extends JPanel implements KeyListener, ActionListener
 	int scoreOne, scoreTwo;
 	Ball ball;
 	Pong game;
-	int widthC;
-	int heightC;
-	boolean gameOver;
-	boolean enableGameOver;
+	int widthC, heightC;
+	boolean gameOver, enableGameOver, developer;
 	int cells;
 	public Panel(Pong game)
 	{
-		pOne = new Rack(KeyEvent.VK_UP, KeyEvent.VK_DOWN, 100, game);
-		pTwo = new Rack(KeyEvent.VK_NUMPAD8, KeyEvent.VK_NUMPAD2, 1064, game);
-		ball = new Ball(-1, 1, game);//difficulty
+		pOne = new Rack(87, 83, 100, game);
+		pTwo = new Rack(KeyEvent.VK_UP, KeyEvent.VK_DOWN, 1064, game);
+		ball = new Ball(-6, 6, game);//difficulty
 		gameOver = false;
-		cells = 18;
+		developer = false;
+		enableGameOver = true;
+		cells = 23;
 		widthC = game.WIDTH;
 		heightC = game.HEIGHT-27;
-		enableGameOver = false;
 		scoreOne = 0;
 		scoreTwo = 0;
 		this.game = game;
 		addKeyListener(this);
-		Timer timer = new Timer(5, this);
+		Timer timer = new Timer(1000/60, this);
         timer.start();
 		setBackground(Color.BLACK);
 		setFocusable(true);
@@ -76,12 +75,29 @@ class Panel extends JPanel implements KeyListener, ActionListener
 
 	public void keyPressed(KeyEvent e)
 	{
-		//System.out.println("Key Pressed!");
+		//System.out.println("Key Pressed! KeyCode :" + e.getKeyCode());
+		if(e.getKeyCode() == KeyEvent.VK_F8)//toggle developer mode
+		{
+			enableGameOver = !enableGameOver;
+			developer = !developer;
+			if(!developer && (scoreOne >= 7 || scoreTwo >= 7))
+			{
+				gameOver = false;
+				scoreOne = 0;
+				scoreTwo = 0;
+			}
+		}
+		if(e.getKeyCode() == KeyEvent.VK_F7)//restart game
+		{
+			scoreOne = 0;
+			scoreTwo = 0;
+			ball.setInitial();
+			gameOver = false;
+		}
+		if(e.getKeyCode() == KeyEvent.VK_F6)ball.increaseVel(1);//increase velocity
+		if(e.getKeyCode() == KeyEvent.VK_F5)ball.decreaseVel(1);//decrease velocity
 		pOne.keyPressed(e.getKeyCode());
 		pTwo.keyPressed(e.getKeyCode());
-		//updatePanel();
-		//repaint();
-		//System.out.println("Updated!");
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -95,8 +111,6 @@ class Panel extends JPanel implements KeyListener, ActionListener
 		//System.out.println("Key Released!");
 		pOne.keyReleased(e.getKeyCode());
 		pTwo.keyReleased(e.getKeyCode());
-		//updatePanel();
-		//repaint();
 	}
 
 	public void gameOver()
@@ -109,31 +123,56 @@ class Panel extends JPanel implements KeyListener, ActionListener
 		//useless method but had to use bcus interface
 	}
 
+	public boolean[][] serialize(int cellSize)
+	{
+		cells = cellSize;
+		boolean[][] input = new boolean[cells][cells];
+		int o = 0; int p = 0;//i, j
+		for(int i = 0; i < cells*((int)(widthC/cells));i += (int)(widthC/cells))
+		{
+			o++;
+			for(int j = 0; j < cells*((int)(heightC/cells));j += (int)(heightC/cells))
+			{
+				p++;
+				if(j != ((int)(game.HEIGHT/cells))*cells)
+				{
+					if((new Rectangle(i, j, (int)(widthC/cells), (int)(heightC/cells))).intersects(ball.getRect()))input[o][p] = true;
+					else input[o][p] = false;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void paintComponent(Graphics g)
 	{
-		//System.out.println("Painted!");
 		super.paintComponent(g);
 		g.setColor(Color.WHITE);
-		//g.drawLine(582,0, 582, game.HEIGHT);
-		g.setFont(new Font("SansSerif", Font.PLAIN, 36));
-		g.drawString("" + scoreOne,582-33, 40);
-		g.drawString("" + scoreTwo,582+10, 40);
+		if(!developer)
+		{
+			g.drawLine(582,0, 582, game.HEIGHT);
+			g.setFont(new Font("SansSerif", Font.PLAIN, 36));
+			g.drawString("" + scoreOne,582-33, 40);
+			g.drawString("" + scoreTwo,582+10, 40);
+		}
 		pOne.paint(g);
 		pTwo.paint(g);
 		ball.paint(g);
-		g.setColor(Color.BLUE);
+		//g.setColor(Color.BLUE);
 		//g.drawRect(0, 0, 1181, 752);
-		for(int i = 0; i < cells*((int)(widthC/cells));i += (int)(widthC/cells))
+		if(developer)
 		{
-			for(int j = 0; j < cells*((int)(heightC/cells));j += (int)(heightC/cells))
+			for(int i = 0; i < cells*((int)(widthC/cells));i += (int)(widthC/cells))
 			{
-				if(j != 792)
+				for(int j = 0; j < cells*((int)(heightC/cells));j += (int)(heightC/cells))
 				{
-					g.setColor(Color.YELLOW);
-					g.drawRect(i, j, (int)(widthC/cells), (int)(heightC/cells));
+					if(j != ((int)(game.HEIGHT/cells))*cells)
+					{
+						g.setColor(Color.YELLOW);
+						if((new Rectangle(i, j, (int)(widthC/cells), (int)(heightC/cells))).intersects(ball.getRect()))g.fillRect(i, j, (int)(widthC/cells), (int)(heightC/cells));
+						else g.drawRect(i, j, (int)(widthC/cells), (int)(heightC/cells));
+					}
 				}
-				//g.setColor(Color.BLUE);
-				//g.drawLine(600, 0, 600, j);
 			}
 		}
 		if(gameOver && enableGameOver)
@@ -164,8 +203,6 @@ class Rack
 	{
 		g.setColor(Color.WHITE);
 		g.fillRect(x, y-139, WIDTH, HEIGHT);
-		//g.setColor(Color.RED);
-		//g.drawRect(x,y-139,WIDTH,HEIGHT); // used for devlopment of hitbox and intersection detection
 	}
 
 	public void keyPressed(int kC)
@@ -222,21 +259,28 @@ class Ball
 
 	public void paint(Graphics g)
 	{
-			g.setColor(Color.WHITE);
+		g.setColor(Color.WHITE);
 		g.fillOval(x, y, WIDTH, HEIGHT);
-	//	g.setColor(Color.RED);
-	//	g.drawRect(x,y,WIDTH,HEIGHT); //used for hitbox detection
+		if(game.oPan.developer)
+		{
+			g.setColor(Color.RED);
+			g.drawRect(x,y,WIDTH,HEIGHT); //used for hitbox detection
+		}
+	}
+
+	public Rectangle getRect()
+	{
+		return new Rectangle(x, y, WIDTH, HEIGHT);
 	}
 
 	public void update()
 	{
 		x += velX;
 		y += velY;
-		if(game.oPan.pOne.getRect().intersects(new Rectangle(x, y, WIDTH, HEIGHT)) || game.oPan.pTwo.getRect().intersects(new Rectangle(x, y, WIDTH, HEIGHT)))//if it hits a racket
+		if(game.oPan.pOne.getRect().intersects(getRect()) || game.oPan.pTwo.getRect().intersects(getRect()))//if it hits a racket
 		{
 			//System.out.println("Collision!");
 			velX = -velX;
-			//velY = -velY;
 		}
 
 		if(x < -20)//if it's completely off the screen to the left
@@ -253,6 +297,24 @@ class Ball
 		}
 
 		if(y < 0 || y > game.HEIGHT-59)velY = -velY;//if it hits the top or bottom
+	}
+
+	public void increaseVel(int inc)
+	{
+		//System.out.println("increase");
+		if(velX < 0)velX -= inc;
+		else velX += inc;
+		if(velY < 0)velY -= inc;
+		else velY += inc;
+	}
+
+	public void decreaseVel(int inc)
+	{
+		//System.out.println("decrease");
+		if(velX < 0)velX += inc;
+		else velX -= inc;
+		if(velY < 0)velY += inc;
+		else velY -= inc;
 	}
 
 	public void setInitial()
