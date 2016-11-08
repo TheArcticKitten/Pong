@@ -79,10 +79,10 @@ class Panel extends JPanel implements KeyListener, ActionListener
 	public void keyPressed(KeyEvent e)
 	{
 		//System.out.println("Key Pressed!");
-		if(e.getKeyCode() == KeyEvent.VK_F8)//developer mode
+		if(e.getKeyCode() == KeyEvent.VK_F8)//toggle developer mode
 		{
-			enableGameOver = false;
-			developer = true;
+			enableGameOver = !enableGameOver;
+			developer = !developer;
 		}
 		if(e.getKeyCode() == KeyEvent.VK_F7)//restart game
 		{
