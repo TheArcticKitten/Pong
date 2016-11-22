@@ -213,8 +213,8 @@ class Rack
 			velocity-= 8;
 			if(velocity < -8)velocity = -8;
 		}
-		if(kC == down)
-		{
+		if(kC == down)//may be redundant
+		{	
 			velocity += 8;
 			if(velocity > 8)velocity = 8;
 		}
@@ -238,8 +238,19 @@ class Rack
 
 	public Rectangle getRect()
 	{
-		return new Rectangle(x, y - 139, WIDTH, HEIGHT);
+		return new Rectangle(x, y - 140, WIDTH, HEIGHT-1);
 	}
+
+	public Rectangle getTop()
+	{
+		return new Rectangle(x, y-139, WIDTH , 1);
+	}
+
+	public Rectangle getBot()
+	{
+		return new Rectangle(x, y-39, WIDTH , 1);
+	}
+
 }
 
 class Ball
@@ -247,12 +258,17 @@ class Ball
 	int x, y, velX, velY;
 	final int WIDTH = 20;
 	final int HEIGHT = 20;
+	int iniX, iniY;
+	final int escapeConstant = 11; 
+	boolean velocityChanged = false;
 	Pong game;
 	public Ball(int velX, int velY, Pong game)
 	{
 		this.game = game;
 		this.velX = velX;
 		this.velY = velY;
+		iniX = velX;
+		iniY = velY;
 		x = 572;
 		y = 400;
 	}
@@ -277,12 +293,22 @@ class Ball
 	{
 		x += velX;
 		y += velY;
+		checkInitial();
 		if(game.oPan.pOne.getRect().intersects(getRect()) || game.oPan.pTwo.getRect().intersects(getRect()))//if it hits a racket
 		{
 			//System.out.println("Collision!");
 			velX = -velX;
 		}
-
+		if(game.oPan.pOne.getTop().intersects(getRect()) || game.oPan.pTwo.getTop().intersects(getRect()))
+		{
+			velY = -escapeConstant;
+			//velX = -velX;
+		}
+		if(game.oPan.pOne.getBot().intersects(getRect()) || game.oPan.pTwo.getBot().intersects(getRect()))
+		{
+			velY = escapeConstant;
+			//velX = -velX;
+		}
 		if(x < -20)//if it's completely off the screen to the left
 		{
 			game.oPan.scoreTwo++;
@@ -306,6 +332,8 @@ class Ball
 		else velX += inc;
 		if(velY < 0)velY -= inc;
 		else velY += inc;
+		velocityChanged = true;
+		iniY = velY;
 	}
 
 	public void decreaseVel(int inc)
@@ -315,7 +343,19 @@ class Ball
 		else velX -= inc;
 		if(velY < 0)velY += inc;
 		else velY -= inc;
+		velocityChanged = true;
+		iniY = velY;
 	}
+
+	public void checkInitial()
+	{
+		if(velY == -escapeConstant && !velocityChanged)velY = -iniY;
+		if(velY == escapeConstant && !velocityChanged)velY = iniY;
+		if(velocityChanged && iniY < escapeConstant && velY == -escapeConstant && velY < 0)velY = -iniY;
+		if(velocityChanged && iniY < escapeConstant && velY == escapeConstant && velY > 0)velY = iniY;
+
+	}
+	//TODO Fix so that decreaseVel and increaseVel will work when vel == 13 
 
 	public void setInitial()
 	{
