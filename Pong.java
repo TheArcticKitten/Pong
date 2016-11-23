@@ -11,6 +11,7 @@ import javax.swing.Timer;
 import java.awt.Rectangle;
 import java.awt.Font;
 import java.lang.InterruptedException;
+import java.util.Random;
 public class Pong extends JFrame
 {
 	static final int WIDTH = 1200;
@@ -42,11 +43,20 @@ class Panel extends JPanel implements KeyListener, ActionListener
 	int widthC, heightC;
 	boolean gameOver, enableGameOver, developer;
 	int cells;
+	Random oRan;
 	public Panel(Pong game)
 	{
 		pOne = new Rack(87, 83, 100, game);
 		pTwo = new Rack(KeyEvent.VK_UP, KeyEvent.VK_DOWN, 1064, game);
-		ball = new Ball(-6, 6, game);//difficulty
+		oRan = new Random();
+
+		switch(oRan.nextInt(4))
+		{
+			case 0: ball = new Ball(-6 - oRan.nextInt(3), -6 - oRan.nextInt(3), game); break;
+			case 1: ball = new Ball(6 + oRan.nextInt(3), 6 + oRan.nextInt(3), game); break;
+			case 2: ball = new Ball(-6 - oRan.nextInt(3), 6 + oRan.nextInt(3), game); break;
+			case 3: ball = new Ball(6 +  oRan.nextInt(3), -6 -  oRan.nextInt(3), game); break;
+		}
 		gameOver = false;
 		developer = false;
 		enableGameOver = true;
@@ -94,8 +104,8 @@ class Panel extends JPanel implements KeyListener, ActionListener
 			ball.setInitial();
 			gameOver = false;
 		}
-		if(e.getKeyCode() == KeyEvent.VK_F6)ball.increaseVel(1);//increase velocity
-		if(e.getKeyCode() == KeyEvent.VK_F5)ball.decreaseVel(1);//decrease velocity
+	//	if(e.getKeyCode() == KeyEvent.VK_F6)ball.increaseVel(1);//increase velocity
+	//	if(e.getKeyCode() == KeyEvent.VK_F5)ball.decreaseVel(1);//decrease velocity
 		pOne.keyPressed(e.getKeyCode());
 		pTwo.keyPressed(e.getKeyCode());
 	}
@@ -259,8 +269,9 @@ class Ball
 	final int WIDTH = 20;
 	final int HEIGHT = 20;
 	int iniX, iniY;
-	final int escapeConstant = 11; 
-	boolean velocityChanged = false;
+	final int escapeConstant = 13; 
+	Random oRan;
+	//boolean velocityChanged = false;
 	Pong game;
 	public Ball(int velX, int velY, Pong game)
 	{
@@ -271,6 +282,7 @@ class Ball
 		iniY = velY;
 		x = 572;
 		y = 400;
+		oRan = new Random();
 	}
 
 	public void paint(Graphics g)
@@ -302,12 +314,12 @@ class Ball
 		if(game.oPan.pOne.getTop().intersects(getRect()) || game.oPan.pTwo.getTop().intersects(getRect()))
 		{
 			velY = -escapeConstant;
-			//velX = -velX;
+			velX = -velX;
 		}
 		if(game.oPan.pOne.getBot().intersects(getRect()) || game.oPan.pTwo.getBot().intersects(getRect()))
 		{
 			velY = escapeConstant;
-			//velX = -velX;
+			velX = -velX;
 		}
 		if(x < -20)//if it's completely off the screen to the left
 		{
@@ -332,7 +344,7 @@ class Ball
 		else velX += inc;
 		if(velY < 0)velY -= inc;
 		else velY += inc;
-		velocityChanged = true;
+	//	velocityChanged = true;
 		iniY = velY;
 	}
 
@@ -343,23 +355,33 @@ class Ball
 		else velX -= inc;
 		if(velY < 0)velY += inc;
 		else velY -= inc;
-		velocityChanged = true;
+		//velocityChanged = true;
 		iniY = velY;
 	}
 
 	public void checkInitial()
 	{
-		if(velY == -escapeConstant && !velocityChanged)velY = -iniY;
-		if(velY == escapeConstant && !velocityChanged)velY = iniY;
-		if(velocityChanged && iniY < escapeConstant && velY == -escapeConstant && velY < 0)velY = -iniY;
-		if(velocityChanged && iniY < escapeConstant && velY == escapeConstant && velY > 0)velY = iniY;
+		if(velY == -escapeConstant)velY = -iniY;
+		if(velY == escapeConstant)velY = iniY;
+		//if(velY == -escapeConstant && !velocityChanged)velY = -iniY;
+		//if(velY == escapeConstant && !velocityChanged)velY = iniY;
+		//if(velocityChanged && iniY < escapeConstant && velY == -escapeConstant && velY < 0)velY = -iniY;
+		//if(velocityChanged && iniY < escapeConstant && velY == escapeConstant && velY > 0)velY = iniY;
 
 	}
-	//TODO Fix so that decreaseVel and increaseVel will work when vel == 13 
+	//TODO Fix so that decreaseVel and increaseVel will work when vel == 13 fuck
 
 	public void setInitial()
 	{
 		x = 572;
 		y = 400;
+		switch(oRan.nextInt(4))
+		{
+			case 0: velX = -6 - oRan.nextInt(3); velY = -6 - oRan.nextInt(3); break;
+			case 1: velX = 6 + oRan.nextInt(3); velY = 6 + oRan.nextInt(3); break;
+			case 2: velX = -6 - oRan.nextInt(3); velY = 6 + oRan.nextInt(3); break;
+			case 3: velX = 6 +  oRan.nextInt(3); velY = -6 -  oRan.nextInt(3); break;
+		}
+		System.out.println("VelX: " + velX + " VelY: " + velY);
 	}
 }
